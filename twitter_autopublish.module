@@ -1,0 +1,51 @@
+<?php
+
+
+/**
+ * @File
+ * This file contains the implementation for the twitter_autopublish module.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function twitter_autopublish_menu() {
+  $items['admin/config/twitter_autopublish'] = array(
+    'title' => t('Configuration for twitter_autopublish module'),
+    'description' => t('Configuration for twitter_autopublish module.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('twitter_autopublish_settings'),
+    'access callback' => 'user_access',
+    'access arguments' => array('Administer twitter'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'twitter_autopublish.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function twitter_autopublish_permission() {
+  return array(
+    'Administer twitter' => array(
+        'title' => t('Administer twitter'),
+        'description' => t('This permission allow people to configure the module twitter_autopublish for sending tweets'),
+    ));
+}
+
+/**
+ * Implements hook_node_insert().
+ */
+function twitter_autopublish_node_insert($node) {
+  $settings = array(
+    'consumer_key' => variable_get('twitter_autopublish_consumer_key'),
+    'access_token' => variable_get('twitter_autopublish_access_token'),
+    'consumer_secret' => variable_get('twitter_autopublish_consumer_key_secret'),
+    'access_token_secret' => variable_get('twitter_autopublish_access_token_secret'),
+  );
+  $twitter_talker = new TwitterTalker($settings);
+  $status = 'Creado el nodo ' . $node->title . ' in #myHashtag';
+  $twitter_talker->createTweet($status);
+}
